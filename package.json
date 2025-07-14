@@ -1,0 +1,23 @@
+{
+  "name": "ai-picturebook",
+  "version": "1.0.0",
+  "type": "module",
+  "description": "動的に子ども向けの絵本を作るiOSアプリ",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/aoiro27/AI-PictureBook.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/aoiro27/AI-PictureBook/issues"
+  },
+  "homepage": "https://github.com/aoiro27/AI-PictureBook#readme",
+  "dependencies": {
+    "@google/genai": "^1.9.0"
+  }
+}
