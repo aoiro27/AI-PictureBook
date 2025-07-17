@@ -8,7 +8,7 @@ async function main() {
     apiKey: process.env.GOOGLE_API_KEY
   });
 
-  const contents = "In a garden, two young children, Shiro-chan and Shiki-chan, are looking at a large, curled-up pill bug. Shiro-chan is pointing at the pill bug with a surprised expression, and Shiki-chan is gently explaining something to Shiro-chan. The scene should be drawn in a gentle, warm, and colorful children's picture book style, with no text in the image itself.";
+  const contents = "Please draw the following picture for a picture book:A 5-year-old boy named Shiki and 1-year-old girl named Shiro shiki and shiro is brother and their mother getting on a white bus with the number 17 to go to school.";
 
   // Set responseModalities to include "Image" so the model can generate  an image
   const response = await ai.models.generateContent({
