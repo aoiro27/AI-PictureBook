@@ -15,7 +15,7 @@ generation_model = ImageGenerationModel.from_pretrained("imagen-3.0-generate-001
 
 # 生成したい画像のプロンプト
 prompt = """
-A photorealistic image of a cookbook laying on a wooden kitchen table, the cover facing forward featuring a smiling family sitting at a similar table, soft overhead lighting illuminating the scene, the cookbook is the main focus of the image.
+Shiki, a 5-year-old boy, takes the number 17 bus to go to school.
 """
 
 # 画像生成
