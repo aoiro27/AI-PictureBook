@@ -403,7 +403,10 @@ struct ContentView: View {
             
             VStack(spacing: 20) {
                 HStack(spacing: 15) {
-                    Button(action: { showingPageCountInput = true }) {
+                    Button(action: { 
+                        showingMainMenu = false
+                        showingPageCountInput = true 
+                    }) {
                         HStack {
                             Image(systemName: "plus.circle.fill")
                                 .font(.title2)
@@ -774,6 +777,7 @@ struct ContentView: View {
     
     private func startBookGeneration() {
         showingPageCountInput = false
+        showingMainMenu = false
         bookPages = []
         currentPage = 0
         isLoading = false
@@ -813,6 +817,7 @@ Write a book for children under 5 years old.
     
     private func returnToMainMenu() {
         showingMainMenu = true
+        showingPageCountInput = false
         bookPages = []
         currentPage = 0
         stopSpeech()
@@ -853,6 +858,7 @@ Write a book for children under 5 years old.
         bookPages = book.pages
         currentPage = 0
         showingMainMenu = false
+        showingPageCountInput = false
         stopSpeech()
         // オープニングBGMを停止して絵本BGMを開始
         bgmManager.stopOpeningBGM()
