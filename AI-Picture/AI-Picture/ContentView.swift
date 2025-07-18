@@ -114,11 +114,6 @@ struct ContentView: View {
                 .ignoresSafeArea()
             
             VStack(spacing: 20) {
-                Text("Original Picture Book")
-                    .font(.largeTitle)
-                    .fontWeight(.bold)
-                    .foregroundColor(.white)
-                    .padding(.top)
             
             if showingMainMenu {
                 // メインメニュー
@@ -169,9 +164,17 @@ struct ContentView: View {
                     // ヘッダー
                     HStack {
                         Button(action: returnToMainMenu) {
-                            Image(systemName: "chevron.left")
-                                .font(.title2)
-                                .foregroundColor(.blue)
+                            HStack(spacing: 5) {
+                                Image(systemName: "chevron.left")
+                                    .font(.title2)
+                                Text("戻る")
+                                    .font(.headline)
+                            }
+                            .foregroundColor(.white)
+                            .padding(.horizontal, 12)
+                            .padding(.vertical, 8)
+                            .background(Color.black.opacity(0.5))
+                            .cornerRadius(20)
                         }
                         .padding(.leading)
                         
@@ -179,13 +182,22 @@ struct ContentView: View {
                         
                         Text("ページ \(currentPage + 1) / \(bookPages.count)")
                             .font(.headline)
+                            .foregroundColor(.white)
                         
                         Spacer()
                         
                         Button(action: saveBook) {
-                            Image(systemName: "square.and.arrow.down")
-                                .font(.title2)
-                                .foregroundColor(.blue)
+                            HStack(spacing: 5) {
+                                Image(systemName: "square.and.arrow.down")
+                                    .font(.title2)
+                                Text("保存")
+                                    .font(.headline)
+                            }
+                            .foregroundColor(.white)
+                            .padding(.horizontal, 12)
+                            .padding(.vertical, 8)
+                            .background(Color.black.opacity(0.5))
+                            .cornerRadius(20)
                         }
                         .padding(.trailing)
                     }
@@ -240,14 +252,14 @@ struct ContentView: View {
                         Button(action: previousPage) {
                             Image(systemName: "chevron.left.circle.fill")
                                 .font(.system(size: 40))
-                                .foregroundColor(currentPage > 0 ? .blue : .gray)
+                                .foregroundColor(currentPage > 0 ? .white : .gray)
                         }
                         .disabled(currentPage <= 0)
                         
                         Button(action: nextPage) {
                             Image(systemName: "chevron.right.circle.fill")
                                 .font(.system(size: 40))
-                                .foregroundColor(currentPage < bookPages.count - 1 ? .blue : .gray)
+                                .foregroundColor(currentPage < bookPages.count - 1 ? .white : .gray)
                         }
                         .disabled(currentPage >= bookPages.count - 1)
                     }
@@ -291,7 +303,7 @@ struct ContentView: View {
                 .font(.system(size: 80))
                 .foregroundColor(.white)
             
-            Text("AI絵本ライブラリ")
+            Text("Original Picture Book")
                 .font(.title)
                 .fontWeight(.bold)
                 .foregroundColor(.white)
