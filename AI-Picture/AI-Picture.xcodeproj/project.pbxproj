@@ -7,19 +7,19 @@
 	objects = {
 
 /* Begin PBXFileReference section */
-		96CC38E72E28C51C008EB29D /* AIPictureBook.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = AIPictureBook.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		8907615C2E2A6F790075E2E9 /* AI-Picture.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "AI-Picture.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
-		96CC38E92E28C51C008EB29D /* AIPictureBook */ = {
+		8907615E2E2A6F790075E2E9 /* AI-Picture */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
-			path = AIPictureBook;
+			path = "AI-Picture";
 			sourceTree = "<group>";
 		};
 /* End PBXFileSystemSynchronizedRootGroup section */
 
 /* Begin PBXFrameworksBuildPhase section */
-		96CC38E42E28C51C008EB29D /* Frameworks */ = {
+		890761592E2A6F790075E2E9 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -29,18 +29,18 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
-		96CC38DE2E28C51C008EB29D = {
+		890761532E2A6F790075E2E9 = {
 			isa = PBXGroup;
 			children = (
-				96CC38E92E28C51C008EB29D /* AIPictureBook */,
-				96CC38E82E28C51C008EB29D /* Products */,
+				8907615E2E2A6F790075E2E9 /* AI-Picture */,
+				8907615D2E2A6F790075E2E9 /* Products */,
 			);
 			sourceTree = "<group>";
 		};
-		96CC38E82E28C51C008EB29D /* Products */ = {
+		8907615D2E2A6F790075E2E9 /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				96CC38E72E28C51C008EB29D /* AIPictureBook.app */,
+				8907615C2E2A6F790075E2E9 /* AI-Picture.app */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -48,64 +48,64 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
-		96CC38E62E28C51C008EB29D /* AIPictureBook */ = {
+		8907615B2E2A6F790075E2E9 /* AI-Picture */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 96CC38F22E28C51F008EB29D /* Build configuration list for PBXNativeTarget "AIPictureBook" */;
+			buildConfigurationList = 890761672E2A6F7A0075E2E9 /* Build configuration list for PBXNativeTarget "AI-Picture" */;
 			buildPhases = (
-				96CC38E32E28C51C008EB29D /* Sources */,
-				96CC38E42E28C51C008EB29D /* Frameworks */,
-				96CC38E52E28C51C008EB29D /* Resources */,
+				890761582E2A6F790075E2E9 /* Sources */,
+				890761592E2A6F790075E2E9 /* Frameworks */,
+				8907615A2E2A6F790075E2E9 /* Resources */,
 			);
 			buildRules = (
 			);
 			dependencies = (
 			);
 			fileSystemSynchronizedGroups = (
-				96CC38E92E28C51C008EB29D /* AIPictureBook */,
+				8907615E2E2A6F790075E2E9 /* AI-Picture */,
 			);
-			name = AIPictureBook;
+			name = "AI-Picture";
 			packageProductDependencies = (
 			);
-			productName = AIPictureBook;
-			productReference = 96CC38E72E28C51C008EB29D /* AIPictureBook.app */;
+			productName = "AI-Picture";
+			productReference = 8907615C2E2A6F790075E2E9 /* AI-Picture.app */;
 			productType = "com.apple.product-type.application";
 		};
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
-		96CC38DF2E28C51C008EB29D /* Project object */ = {
+		890761542E2A6F790075E2E9 /* Project object */ = {
 			isa = PBXProject;
 			attributes = {
 				BuildIndependentTargetsInParallel = 1;
-				LastSwiftUpdateCheck = 1640;
-				LastUpgradeCheck = 1640;
+				LastSwiftUpdateCheck = 1630;
+				LastUpgradeCheck = 1630;
 				TargetAttributes = {
-					96CC38E62E28C51C008EB29D = {
-						CreatedOnToolsVersion = 16.4;
+					8907615B2E2A6F790075E2E9 = {
+						CreatedOnToolsVersion = 16.3;
 					};
 				};
 			};
-			buildConfigurationList = 96CC38E22E28C51C008EB29D /* Build configuration list for PBXProject "AIPictureBook" */;
+			buildConfigurationList = 890761572E2A6F790075E2E9 /* Build configuration list for PBXProject "AI-Picture" */;
 			developmentRegion = en;
 			hasScannedForEncodings = 0;
 			knownRegions = (
 				en,
 				Base,
 			);
-			mainGroup = 96CC38DE2E28C51C008EB29D;
+			mainGroup = 890761532E2A6F790075E2E9;
 			minimizedProjectReferenceProxies = 1;
 			preferredProjectObjectVersion = 77;
-			productRefGroup = 96CC38E82E28C51C008EB29D /* Products */;
+			productRefGroup = 8907615D2E2A6F790075E2E9 /* Products */;
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
-				96CC38E62E28C51C008EB29D /* AIPictureBook */,
+				8907615B2E2A6F790075E2E9 /* AI-Picture */,
 			);
 		};
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
-		96CC38E52E28C51C008EB29D /* Resources */ = {
+		8907615A2E2A6F790075E2E9 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -115,7 +115,7 @@
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
-		96CC38E32E28C51C008EB29D /* Sources */ = {
+		890761582E2A6F790075E2E9 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -125,7 +125,7 @@
 /* End PBXSourcesBuildPhase section */
 
 /* Begin XCBuildConfiguration section */
-		96CC38F02E28C51F008EB29D /* Debug */ = {
+		890761652E2A6F7A0075E2E9 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
@@ -160,6 +160,7 @@
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				COPY_PHASE_STRIP = NO;
 				DEBUG_INFORMATION_FORMAT = dwarf;
+				DEVELOPMENT_TEAM = UMS95NYGUN;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
 				ENABLE_TESTABILITY = YES;
 				ENABLE_USER_SCRIPT_SANDBOXING = YES;
@@ -177,7 +178,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 18.5;
+				IPHONEOS_DEPLOYMENT_TARGET = 18.4;
 				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
 				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
 				MTL_FAST_MATH = YES;
@@ -188,7 +189,7 @@
 			};
 			name = Debug;
 		};
-		96CC38F12E28C51F008EB29D /* Release */ = {
+		890761662E2A6F7A0075E2E9 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
@@ -223,6 +224,7 @@
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				COPY_PHASE_STRIP = NO;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				DEVELOPMENT_TEAM = UMS95NYGUN;
 				ENABLE_NS_ASSERTIONS = NO;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
 				ENABLE_USER_SCRIPT_SANDBOXING = YES;
@@ -234,7 +236,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 18.5;
+				IPHONEOS_DEPLOYMENT_TARGET = 18.4;
 				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				MTL_FAST_MATH = YES;
@@ -244,13 +246,14 @@
 			};
 			name = Release;
 		};
-		96CC38F32E28C51F008EB29D /* Debug */ = {
+		890761682E2A6F7A0075E2E9 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = UMS95NYGUN;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
@@ -263,7 +266,7 @@
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = aoiro.savant.AIPictureBook;
+				PRODUCT_BUNDLE_IDENTIFIER = "aoiro.savant.AI-Picture";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
@@ -271,13 +274,14 @@
 			};
 			name = Debug;
 		};
-		96CC38F42E28C51F008EB29D /* Release */ = {
+		890761692E2A6F7A0075E2E9 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = UMS95NYGUN;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
@@ -290,7 +294,7 @@
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = aoiro.savant.AIPictureBook;
+				PRODUCT_BUNDLE_IDENTIFIER = "aoiro.savant.AI-Picture";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
@@ -301,25 +305,25 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		96CC38E22E28C51C008EB29D /* Build configuration list for PBXProject "AIPictureBook" */ = {
+		890761572E2A6F790075E2E9 /* Build configuration list for PBXProject "AI-Picture" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				96CC38F02E28C51F008EB29D /* Debug */,
-				96CC38F12E28C51F008EB29D /* Release */,
+				890761652E2A6F7A0075E2E9 /* Debug */,
+				890761662E2A6F7A0075E2E9 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		96CC38F22E28C51F008EB29D /* Build configuration list for PBXNativeTarget "AIPictureBook" */ = {
+		890761672E2A6F7A0075E2E9 /* Build configuration list for PBXNativeTarget "AI-Picture" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				96CC38F32E28C51F008EB29D /* Debug */,
-				96CC38F42E28C51F008EB29D /* Release */,
+				890761682E2A6F7A0075E2E9 /* Debug */,
+				890761692E2A6F7A0075E2E9 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 	};
-	rootObject = 96CC38DF2E28C51C008EB29D /* Project object */;
+	rootObject = 890761542E2A6F790075E2E9 /* Project object */;
 }

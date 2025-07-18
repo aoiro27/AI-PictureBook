@@ -1,14 +1,14 @@
 //
-//  AIPictureBookApp.swift
-//  AIPictureBook
+//  AI_PictureApp.swift
+//  AI-Picture
 //
-//  Created by Yuki Usui on 2025/07/17.
+//  Created by aoiro on 2025/07/18.
 //
 
 import SwiftUI
 
 @main
-struct AIPictureBookApp: App {
+struct AI_PictureApp: App {
     var body: some Scene {
         WindowGroup {
             ContentView()
