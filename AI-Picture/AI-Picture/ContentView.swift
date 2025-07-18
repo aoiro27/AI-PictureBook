@@ -84,6 +84,43 @@ class SpeechManager: NSObject, ObservableObject, AVSpeechSynthesizerDelegate {
     }
 }
 
+class BGMManager: NSObject, ObservableObject {
+    private var audioPlayer: AVAudioPlayer?
+    @Published var isPlaying: Bool = false
+    
+    func playBGM() {
+        guard let url = Bundle.main.url(forResource: "book", withExtension: "mp3") else {
+            print("BGMファイルが見つかりません")
+            return
+        }
+        
+        do {
+            audioPlayer = try AVAudioPlayer(contentsOf: url)
+            audioPlayer?.numberOfLoops = -1 // 無限ループ
+            audioPlayer?.volume = 0.3 // 音量を30%に設定
+            audioPlayer?.play()
+            isPlaying = true
+        } catch {
+            print("BGM再生エラー: \(error)")
+        }
+    }
+    
+    func stopBGM() {
+        audioPlayer?.stop()
+        isPlaying = false
+    }
+    
+    func pauseBGM() {
+        audioPlayer?.pause()
+        isPlaying = false
+    }
+    
+    func resumeBGM() {
+        audioPlayer?.play()
+        isPlaying = true
+    }
+}
+
 struct ContentView: View {
     @State private var bookPages: [BookPage] = []
     @State private var currentPage: Int = 0
@@ -91,6 +128,7 @@ struct ContentView: View {
     @State private var isGeneratingImages: Bool = false
     @State private var errorMessage: String? = nil
     @StateObject private var speechManager = SpeechManager()
+    @StateObject private var bgmManager = BGMManager()
     @State private var savedBooks: [SavedBook] = []
     @State private var showingMainMenu: Bool = true
     @State private var showingDeleteAlert: Bool = false
@@ -186,18 +224,30 @@ struct ContentView: View {
                         
                         Spacer()
                         
-                        Button(action: saveBook) {
-                            HStack(spacing: 5) {
-                                Image(systemName: "square.and.arrow.down")
+                        HStack(spacing: 10) {
+                            Button(action: toggleBGM) {
+                                Image(systemName: bgmManager.isPlaying ? "speaker.wave.2.fill" : "speaker.slash.fill")
                                     .font(.title2)
-                                Text("保存")
-                                    .font(.headline)
+                                    .foregroundColor(.white)
                             }
-                            .foregroundColor(.white)
-                            .padding(.horizontal, 12)
+                            .padding(.horizontal, 8)
                             .padding(.vertical, 8)
                             .background(Color.black.opacity(0.5))
-                            .cornerRadius(20)
+                            .cornerRadius(15)
+                            
+                            Button(action: saveBook) {
+                                HStack(spacing: 5) {
+                                    Image(systemName: "square.and.arrow.down")
+                                        .font(.title2)
+                                    Text("保存")
+                                        .font(.headline)
+                                }
+                                .foregroundColor(.white)
+                                .padding(.horizontal, 12)
+                                .padding(.vertical, 8)
+                                .background(Color.black.opacity(0.5))
+                                .cornerRadius(20)
+                            }
                         }
                         .padding(.trailing)
                     }
@@ -520,6 +570,8 @@ struct ContentView: View {
                                         self.executeSecondRequest(prompt: constPrefix + page.illustrationIdea, pageIndex: index, retryCount: 0)
                                     }
                                     
+                                    // BGMを開始
+                                    self.bgmManager.playBGM()
                                     // 最初のページの音声読み上げを開始
                                     DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
                                         self.startSpeech()
@@ -627,6 +679,14 @@ struct ContentView: View {
         speechManager.stopSpeaking()
     }
     
+    private func toggleBGM() {
+        if bgmManager.isPlaying {
+            bgmManager.pauseBGM()
+        } else {
+            bgmManager.resumeBGM()
+        }
+    }
+    
     // MARK: - 保存・読み込み・削除機能
     
     private func createNewBook() {
@@ -677,6 +737,7 @@ Write a book for children under 5 years old.
         bookPages = []
         currentPage = 0
         stopSpeech()
+        bgmManager.stopBGM()
     }
     
     private func saveBook() {
@@ -710,6 +771,8 @@ Write a book for children under 5 years old.
         currentPage = 0
         showingMainMenu = false
         stopSpeech()
+        // BGMを開始
+        bgmManager.playBGM()
         // 絵本読み込み後に音声読み上げを開始
         DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
             startSpeech()
