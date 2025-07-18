@@ -351,7 +351,7 @@ struct ContentView: View {
                             Text(bookPages[currentPage].text)
                                 .font(.title3)
                                 .multilineTextAlignment(.center)
-                                .padding(.horizontal, 20)
+                                .padding(.horizontal, 40)
                                 .frame(minHeight: 80)
                         }
                         .padding()
