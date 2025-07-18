@@ -85,8 +85,10 @@ class SpeechManager: NSObject, ObservableObject, AVSpeechSynthesizerDelegate {
 }
 
 class BGMManager: NSObject, ObservableObject {
-    private var audioPlayer: AVAudioPlayer?
+    private var bookAudioPlayer: AVAudioPlayer?
+    private var openingAudioPlayer: AVAudioPlayer?
     @Published var isPlaying: Bool = false
+    @Published var isOpeningPlaying: Bool = false
     
     func playBGM() {
         guard let url = Bundle.main.url(forResource: "book", withExtension: "mp3") else {
@@ -95,29 +97,66 @@ class BGMManager: NSObject, ObservableObject {
         }
         
         do {
-            audioPlayer = try AVAudioPlayer(contentsOf: url)
-            audioPlayer?.numberOfLoops = -1 // 無限ループ
-            audioPlayer?.volume = 0.3 // 音量を30%に設定
-            audioPlayer?.play()
+            bookAudioPlayer = try AVAudioPlayer(contentsOf: url)
+            bookAudioPlayer?.numberOfLoops = -1 // 無限ループ
+            bookAudioPlayer?.volume = 0.3 // 音量を30%に設定
+            bookAudioPlayer?.play()
             isPlaying = true
         } catch {
             print("BGM再生エラー: \(error)")
         }
     }
     
+    func playOpeningBGM() {
+        guard let url = Bundle.main.url(forResource: "opening", withExtension: "mp3") else {
+            print("オープニングBGMファイルが見つかりません")
+            return
+        }
+        
+        do {
+            openingAudioPlayer = try AVAudioPlayer(contentsOf: url)
+            openingAudioPlayer?.numberOfLoops = -1 // 無限ループ
+            openingAudioPlayer?.volume = 0.4 // 音量を40%に設定
+            openingAudioPlayer?.play()
+            isOpeningPlaying = true
+        } catch {
+            print("オープニングBGM再生エラー: \(error)")
+        }
+    }
+    
     func stopBGM() {
-        audioPlayer?.stop()
+        bookAudioPlayer?.stop()
         isPlaying = false
+    }
+    
+    func stopOpeningBGM() {
+        openingAudioPlayer?.stop()
+        isOpeningPlaying = false
     }
     
     func pauseBGM() {
-        audioPlayer?.pause()
+        bookAudioPlayer?.pause()
         isPlaying = false
     }
     
+    func pauseOpeningBGM() {
+        openingAudioPlayer?.pause()
+        isOpeningPlaying = false
+    }
+    
     func resumeBGM() {
-        audioPlayer?.play()
+        bookAudioPlayer?.play()
         isPlaying = true
+    }
+    
+    func resumeOpeningBGM() {
+        openingAudioPlayer?.play()
+        isOpeningPlaying = true
+    }
+    
+    func stopAllBGM() {
+        stopBGM()
+        stopOpeningBGM()
     }
 }
 
@@ -264,7 +303,7 @@ struct ContentView: View {
                                     ProgressView()
                                         .frame(height: 300)
                                 case .success(let image):
-                                    image
+                                     image
                                         .resizable()
                                         .scaledToFit()
                                         .frame(maxWidth: 350, maxHeight: 300)
@@ -328,6 +367,10 @@ struct ContentView: View {
         }
         .onAppear {
             loadSavedBooks()
+            // アプリ起動時にオープニングBGMを開始
+            if !bgmManager.isOpeningPlaying {
+                bgmManager.playOpeningBGM()
+            }
         }
         .alert("保存済み絵本を削除", isPresented: $showingDeleteAlert) {
             Button("削除", role: .destructive) {
@@ -359,18 +402,29 @@ struct ContentView: View {
                 .foregroundColor(.white)
             
             VStack(spacing: 20) {
-                Button(action: { showingPageCountInput = true }) {
-                    HStack {
-                        Image(systemName: "plus.circle.fill")
-                            .font(.title2)
-                        Text("新しい絵本を作る")
-                            .font(.title3)
-                            .fontWeight(.semibold)
+                HStack(spacing: 15) {
+                    Button(action: { showingPageCountInput = true }) {
+                        HStack {
+                            Image(systemName: "plus.circle.fill")
+                                .font(.title2)
+                            Text("新しい絵本を作る")
+                                .font(.title3)
+                                .fontWeight(.semibold)
+                        }
+                        .frame(width: 200, height: 50)
+                        .background(Color.blue)
+                        .foregroundColor(.white)
+                        .cornerRadius(25)
                     }
-                    .frame(width: 250, height: 50)
-                    .background(Color.blue)
-                    .foregroundColor(.white)
-                    .cornerRadius(25)
+                    
+                    Button(action: toggleOpeningBGM) {
+                        Image(systemName: bgmManager.isOpeningPlaying ? "speaker.wave.2.fill" : "speaker.slash.fill")
+                            .font(.title2)
+                            .foregroundColor(.white)
+                            .frame(width: 50, height: 50)
+                            .background(Color.black.opacity(0.5))
+                            .cornerRadius(25)
+                    }
                 }
                 
                 if !savedBooks.isEmpty {
@@ -470,25 +524,41 @@ struct ContentView: View {
                     .font(.caption)
                     .foregroundColor(.gray)
                 
-                HStack(spacing: 20) {
-                    Button(action: { showingPageCountInput = false }) {
-                        Text("キャンセル")
-                            .font(.title3)
-                            .fontWeight(.semibold)
-                            .frame(width: 120, height: 50)
-                            .background(Color.gray)
-                            .foregroundColor(.white)
-                            .cornerRadius(25)
+                VStack(spacing: 15) {
+                    HStack(spacing: 20) {
+                        Button(action: { showingPageCountInput = false }) {
+                            Text("キャンセル")
+                                .font(.title3)
+                                .fontWeight(.semibold)
+                                .frame(width: 120, height: 50)
+                                .background(Color.gray)
+                                .foregroundColor(.white)
+                                .cornerRadius(25)
+                        }
+                        
+                        Button(action: startBookGeneration) {
+                            Text("作成開始")
+                                .font(.title3)
+                                .fontWeight(.semibold)
+                                .frame(width: 120, height: 50)
+                                .background(Color.blue)
+                                .foregroundColor(.white)
+                                .cornerRadius(25)
+                        }
                     }
                     
-                    Button(action: startBookGeneration) {
-                        Text("作成開始")
-                            .font(.title3)
-                            .fontWeight(.semibold)
-                            .frame(width: 120, height: 50)
-                            .background(Color.blue)
-                            .foregroundColor(.white)
-                            .cornerRadius(25)
+                    Button(action: toggleOpeningBGM) {
+                        HStack(spacing: 8) {
+                            Image(systemName: bgmManager.isOpeningPlaying ? "speaker.wave.2.fill" : "speaker.slash.fill")
+                                .font(.title2)
+                            Text(bgmManager.isOpeningPlaying ? "音楽停止" : "音楽再生")
+                                .font(.headline)
+                        }
+                        .foregroundColor(.white)
+                        .padding(.horizontal, 20)
+                        .padding(.vertical, 10)
+                        .background(Color.black.opacity(0.5))
+                        .cornerRadius(20)
                     }
                 }
             }
@@ -570,7 +640,8 @@ struct ContentView: View {
                                         self.executeSecondRequest(prompt: constPrefix + page.illustrationIdea, pageIndex: index, retryCount: 0)
                                     }
                                     
-                                    // BGMを開始
+                                    // オープニングBGMを停止して絵本BGMを開始
+                                    self.bgmManager.stopOpeningBGM()
                                     self.bgmManager.playBGM()
                                     // 最初のページの音声読み上げを開始
                                     DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
@@ -687,6 +758,14 @@ struct ContentView: View {
         }
     }
     
+    private func toggleOpeningBGM() {
+        if bgmManager.isOpeningPlaying {
+            bgmManager.pauseOpeningBGM()
+        } else {
+            bgmManager.resumeOpeningBGM()
+        }
+    }
+    
     // MARK: - 保存・読み込み・削除機能
     
     private func createNewBook() {
@@ -738,6 +817,10 @@ Write a book for children under 5 years old.
         currentPage = 0
         stopSpeech()
         bgmManager.stopBGM()
+        // メインメニューに戻ったらオープニングBGMを再開
+        if !bgmManager.isOpeningPlaying {
+            bgmManager.playOpeningBGM()
+        }
     }
     
     private func saveBook() {
@@ -771,7 +854,8 @@ Write a book for children under 5 years old.
         currentPage = 0
         showingMainMenu = false
         stopSpeech()
-        // BGMを開始
+        // オープニングBGMを停止して絵本BGMを開始
+        bgmManager.stopOpeningBGM()
         bgmManager.playBGM()
         // 絵本読み込み後に音声読み上げを開始
         DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
