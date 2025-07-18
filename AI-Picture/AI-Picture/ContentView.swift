@@ -646,10 +646,7 @@ struct ContentView: View {
                                     // オープニングBGMを停止して絵本BGMを開始
                                     self.bgmManager.stopOpeningBGM()
                                     self.bgmManager.playBGM()
-                                    // 最初のページの音声読み上げを開始
-                                    DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
-                                        self.startSpeech()
-                                    }
+                                    // 音声読み上げは画像生成完了後に開始される
                                 }
                             }
                         }
@@ -739,6 +736,11 @@ struct ContentView: View {
         if allCompleted {
             isGeneratingImages = false
             isLoading = false
+            
+            // 画像生成完了後に音声読み上げを開始
+            DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
+                self.startSpeech()
+            }
         }
     }
     
