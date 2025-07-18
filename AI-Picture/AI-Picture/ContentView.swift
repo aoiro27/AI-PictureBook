@@ -26,6 +26,23 @@ struct BookPage: Codable {
         self.imageUrl = imageUrl
         self.imageLoadingStatus = imageUrl != nil ? .success : .loading
     }
+    
+    init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        pageNumber = try container.decode(Int.self, forKey: .pageNumber)
+        text = try container.decode(String.self, forKey: .text)
+        illustrationIdea = try container.decode(String.self, forKey: .illustrationIdea)
+        imageUrl = try container.decodeIfPresent(String.self, forKey: .imageUrl)
+        imageLoadingStatus = imageUrl != nil ? .success : .loading
+    }
+    
+    func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: CodingKeys.self)
+        try container.encode(pageNumber, forKey: .pageNumber)
+        try container.encode(text, forKey: .text)
+        try container.encode(illustrationIdea, forKey: .illustrationIdea)
+        try container.encodeIfPresent(imageUrl, forKey: .imageUrl)
+    }
 }
 
 struct SavedBook: Codable, Identifiable {
@@ -75,7 +92,7 @@ class SpeechManager: NSObject, ObservableObject, AVSpeechSynthesizerDelegate {
         }
         isSpeaking = false
     }
-        
+    
     // AVSpeechSynthesizerDelegate Delegate
     func speechSynthesizer(_ synthesizer: AVSpeechSynthesizer, didFinish utterance: AVSpeechUtterance) {
         DispatchQueue.main.async {
@@ -186,99 +203,62 @@ struct ContentView: View {
                 .clipped()
                 .ignoresSafeArea()
             
-            // 背景オーバーレイ（テキストの可読性向上）
-            Color.black.opacity(0.3)
-                .ignoresSafeArea()
             
             VStack(spacing: 20) {
-            
-            if showingMainMenu {
-                // メインメニュー
-                mainMenuView
-            } else if showingPageCountInput {
-                // ページ数入力画面
-                pageCountInputView
-            } else if bookPages.isEmpty || isGeneratingImages {
-                // 初期画面または画像生成中
-                VStack(spacing: 30) {
-                    if isGeneratingImages {
-                        Image(systemName: "paintbrush.fill")
-                            .font(.system(size: 80))
-                            .foregroundColor(.orange)
-                        
-                        Text("画像を生成中...")
-                            .font(.title2)
-                            .fontWeight(.semibold)
-                        
-                        ProgressView()
-                            .progressViewStyle(CircularProgressViewStyle(tint: .orange))
-                            .scaleEffect(1.5)
-                    } else {
-                        Image(systemName: "book.fill")
-                            .font(.system(size: 80))
-                            .foregroundColor(.blue)
-                        
-                        Button(action: generateImage) {
-                            if isLoading {
-                                ProgressView()
-                                    .progressViewStyle(CircularProgressViewStyle(tint: .white))
-                            } else {
-                                Text("絵本を生成")
-                                    .font(.title2)
-                                    .fontWeight(.semibold)
-                            }
-                        }
-                        .frame(width: 200, height: 50)
-                        .background(isLoading ? Color.gray : Color.blue)
-                        .foregroundColor(.white)
-                        .cornerRadius(25)
-                        .disabled(isLoading)
-                    }
-                }
-            } else {
-                // 絵本表示画面
-                VStack(spacing: 0) {
-                    // ヘッダー
-                    HStack {
-                        Button(action: returnToMainMenu) {
-                            HStack(spacing: 5) {
-                                Image(systemName: "chevron.left")
-                                    .font(.title2)
-                                Text("戻る")
-                                    .font(.headline)
-                            }
-                            .foregroundColor(.white)
-                            .padding(.horizontal, 12)
-                            .padding(.vertical, 8)
-                            .background(Color.black.opacity(0.5))
-                            .cornerRadius(20)
-                        }
-                        .padding(.leading)
-                        
-                        Spacer()
-                        
-                        Text("ページ \(currentPage + 1) / \(bookPages.count)")
-                            .font(.headline)
-                            .foregroundColor(.white)
-                        
-                        Spacer()
-                        
-                        HStack(spacing: 10) {
-                            Button(action: toggleBGM) {
-                                Image(systemName: bgmManager.isPlaying ? "speaker.wave.2.fill" : "speaker.slash.fill")
-                                    .font(.title2)
-                                    .foregroundColor(.white)
-                            }
-                            .padding(.horizontal, 8)
-                            .padding(.vertical, 8)
-                            .background(Color.black.opacity(0.5))
-                            .cornerRadius(15)
+                
+                if showingMainMenu {
+                    // メインメニュー
+                    mainMenuView
+                } else if showingPageCountInput {
+                    // ページ数入力画面
+                    pageCountInputView
+                } else if bookPages.isEmpty || isGeneratingImages {
+                    // 初期画面または画像生成中
+                    VStack(spacing: 30) {
+                        if isGeneratingImages {
+                            Image(systemName: "paintbrush.fill")
+                                .font(.system(size: 80))
+                                .foregroundColor(.orange)
                             
-                            Button(action: saveBook) {
-                                HStack(spacing: 5) {
-                                    Image(systemName: "square.and.arrow.down")
+                            Text("画像を生成中...")
+                                .font(.title2)
+                                .fontWeight(.semibold)
+                            
+                            ProgressView()
+                                .progressViewStyle(CircularProgressViewStyle(tint: .orange))
+                                .scaleEffect(1.5)
+                        } else {
+                            Image(systemName: "book.fill")
+                                .font(.system(size: 80))
+                                .foregroundColor(.blue)
+                            
+                            Button(action: generateImage) {
+                                if isLoading {
+                                    ProgressView()
+                                        .progressViewStyle(CircularProgressViewStyle(tint: .white))
+                                } else {
+                                    Text("絵本を生成")
                                         .font(.title2)
-                                    Text("保存")
+                                        .fontWeight(.semibold)
+                                }
+                            }
+                            .frame(width: 200, height: 50)
+                            .background(isLoading ? Color.gray : Color.blue)
+                            .foregroundColor(.white)
+                            .cornerRadius(25)
+                            .disabled(isLoading)
+                        }
+                    }
+                } else {
+                    // 絵本表示画面
+                    VStack(spacing: 0) {
+                        // ヘッダー
+                        HStack {
+                            Button(action: returnToMainMenu) {
+                                HStack(spacing: 5) {
+                                    Image(systemName: "chevron.left")
+                                        .font(.title2)
+                                    Text("戻る")
                                         .font(.headline)
                                 }
                                 .foregroundColor(.white)
@@ -287,82 +267,117 @@ struct ContentView: View {
                                 .background(Color.black.opacity(0.5))
                                 .cornerRadius(20)
                             }
-                        }
-                        .padding(.trailing)
-                    }
-                    .padding(.top)
-                    
-                    // 絵本ページ
-                    VStack(spacing: 20) {
-                        // 画像表示
-                        if let imageUrl = bookPages[currentPage].imageUrl,
-                           let imageURL = URL(string: imageUrl) {
-                            AsyncImage(url: imageURL) { phase in
-                                switch phase {
-                                case .empty:
-                                    ProgressView()
-                                        .frame(height: 300)
-                                case .success(let image):
-                                     image
-                                        .resizable()
-                                        .scaledToFit()
-                                        .frame(maxWidth: 350, maxHeight: 300)
-                                        .cornerRadius(15)
-                                case .failure:
-                                    Image(systemName: "photo")
-                                        .font(.system(size: 100))
-                                        .foregroundColor(.gray)
-                                        .frame(height: 300)
-                                @unknown default:
-                                    EmptyView()
+                            .padding(.leading)
+                            
+                            Spacer()
+                            
+                            Text("ページ \(currentPage + 1) / \(bookPages.count)")
+                                .font(.headline)
+                                .foregroundColor(.white)
+                            
+                            Spacer()
+                            
+                            HStack(spacing: 10) {
+                                Button(action: toggleBGM) {
+                                    Image(systemName: bgmManager.isPlaying ? "speaker.wave.2.fill" : "speaker.slash.fill")
+                                        .font(.title2)
+                                        .foregroundColor(.white)
+                                }
+                                .padding(.horizontal, 8)
+                                .padding(.vertical, 8)
+                                .background(Color.black.opacity(0.5))
+                                .cornerRadius(15)
+                                
+                                Button(action: saveBook) {
+                                    HStack(spacing: 5) {
+                                        Image(systemName: "square.and.arrow.down")
+                                            .font(.title2)
+                                        Text("保存")
+                                            .font(.headline)
+                                    }
+                                    .foregroundColor(.white)
+                                    .padding(.horizontal, 12)
+                                    .padding(.vertical, 8)
+                                    .background(Color.black.opacity(0.5))
+                                    .cornerRadius(20)
                                 }
                             }
-                        } else {
-                            Rectangle()
-                                .fill(Color.gray.opacity(0.3))
-                                .frame(height: 300)
-                                .overlay(
-                                    ProgressView()
-                                        .progressViewStyle(CircularProgressViewStyle())
-                                )
+                            .padding(.trailing)
                         }
+                        .padding(.top)
+                        .padding(.horizontal, 50)
                         
-                        // テキスト表示
-                        Text(bookPages[currentPage].text)
-                            .font(.title3)
-                            .multilineTextAlignment(.center)
-                            .padding(.horizontal, 20)
-                            .frame(minHeight: 80)
-                    }
-                    .padding()
-                    
-                    // ページ送りボタン
-                    HStack(spacing: 40) {
-                        Button(action: previousPage) {
-                            Image(systemName: "chevron.left.circle.fill")
-                                .font(.system(size: 40))
-                                .foregroundColor(currentPage > 0 ? .white : .gray)
+                        // 絵本ページ
+                        VStack(spacing: 20) {
+                            // 画像表示
+                            if let imageUrl = bookPages[currentPage].imageUrl,
+                               let imageURL = URL(string: imageUrl) {
+                                AsyncImage(url: imageURL) { phase in
+                                    switch phase {
+                                    case .empty:
+                                        ProgressView()
+                                            .frame(height: 300)
+                                    case .success(let image):
+                                        image
+                                            .resizable()
+                                            .scaledToFit()
+                                            .frame(maxWidth: 350, maxHeight: 300)
+                                            .cornerRadius(15)
+                                    case .failure:
+                                        Image(systemName: "photo")
+                                            .font(.system(size: 100))
+                                            .foregroundColor(.gray)
+                                            .frame(height: 300)
+                                    @unknown default:
+                                        EmptyView()
+                                    }
+                                }
+                            } else {
+                                Rectangle()
+                                    .fill(Color.gray.opacity(0.3))
+                                    .frame(height: 300)
+                                    .overlay(
+                                        ProgressView()
+                                            .progressViewStyle(CircularProgressViewStyle())
+                                    )
+                            }
+                            
+                            // テキスト表示
+                            Text(bookPages[currentPage].text)
+                                .font(.title3)
+                                .multilineTextAlignment(.center)
+                                .padding(.horizontal, 20)
+                                .frame(minHeight: 80)
                         }
-                        .disabled(currentPage <= 0)
+                        .padding()
                         
-                        Button(action: nextPage) {
-                            Image(systemName: "chevron.right.circle.fill")
-                                .font(.system(size: 40))
-                                .foregroundColor(currentPage < bookPages.count - 1 ? .white : .gray)
+                        // ページ送りボタン
+                        HStack(spacing: 40) {
+                            Button(action: previousPage) {
+                                Image(systemName: "chevron.left.circle.fill")
+                                    .font(.system(size: 40))
+                                    .foregroundColor(currentPage > 0 ? .white : .gray)
+                            }
+                            .disabled(currentPage <= 0)
+                            
+                            Button(action: nextPage) {
+                                Image(systemName: "chevron.right.circle.fill")
+                                    .font(.system(size: 40))
+                                    .foregroundColor(currentPage < bookPages.count - 1 ? .white : .gray)
+                            }
+                            .disabled(currentPage >= bookPages.count - 1)
                         }
-                        .disabled(currentPage >= bookPages.count - 1)
+                        .padding(.bottom)
                     }
-                    .padding(.bottom)
                 }
-            }
-            
-            if let error = errorMessage {
-                Text(error)
-                    .foregroundColor(.red)
-                    .padding()
-            }
-            
-            Spacer()
+                
+                if let error = errorMessage {
+                    Text(error)
+                        .foregroundColor(.red)
+                        .padding()
+                }
+                
+                Spacer()
             }
         }
         .onAppear {
@@ -391,21 +406,21 @@ struct ContentView: View {
     }
     
     private var mainMenuView: some View {
-        VStack(spacing: 30) {
+        VStack(spacing: 15) {
             Image(systemName: "books.vertical.fill")
-                .font(.system(size: 80))
+                .font(.system(size: 50))
                 .foregroundColor(.white)
             
             Text("Original Picture Book")
-                .font(.title)
+                .font(.title2)
                 .fontWeight(.bold)
                 .foregroundColor(.white)
             
-            VStack(spacing: 20) {
+            VStack(spacing: 12) {
                 HStack(spacing: 15) {
-                    Button(action: { 
+                    Button(action: {
                         showingMainMenu = false
-                        showingPageCountInput = true 
+                        showingPageCountInput = true
                     }) {
                         HStack {
                             Image(systemName: "plus.circle.fill")
@@ -433,45 +448,70 @@ struct ContentView: View {
                 if !savedBooks.isEmpty {
                     Text("保存済みの絵本")
                         .font(.headline)
-                        .padding(.top, 20)
+                        .foregroundColor(.white)
+                        .padding(.top, 10)
                     
                     ScrollView {
-                        LazyVStack(spacing: 15) {
+                        LazyVStack(spacing: 10) {
                             ForEach(savedBooks) { book in
                                 savedBookRow(book)
                             }
                         }
-                        .padding(.horizontal)
+                        .padding(.horizontal, 10)
                     }
-                    .frame(maxHeight: 400)
+                    .frame(maxHeight: 250)
+                    .padding(.bottom, 10)
+                    .padding(.horizontal, 60)
+                } else {
+                    VStack(spacing: 6) {
+                        Image(systemName: "book.closed")
+                            .font(.system(size: 25))
+                            .foregroundColor(.white.opacity(0.7))
+                        
+                        Text("保存済みの絵本はありません")
+                            .font(.subheadline)
+                            .foregroundColor(.white.opacity(0.7))
+                        
+                        Text("絵本を作成して保存してみましょう")
+                            .font(.caption)
+                            .foregroundColor(.white.opacity(0.5))
+                    }
+                    .padding(.top, 8)
                 }
             }
         }
-        .padding()
+        .padding(.horizontal, 20)
+        .padding(.vertical, 10)
     }
     
     private func savedBookRow(_ book: SavedBook) -> some View {
         HStack {
-            VStack(alignment: .leading, spacing: 5) {
+            VStack(alignment: .leading, spacing: 3) {
                 Text(book.title)
                     .font(.headline)
                     .lineLimit(1)
+                    .foregroundColor(.black)
                 
                 Text("\(book.pageCount)ページ • \(formatDate(book.createdAt))")
                     .font(.caption)
                     .foregroundColor(.gray)
+                
+                // デバッグ情報
+                Text("ID: \(book.id.uuidString.prefix(8))")
+                    .font(.caption2)
+                    .foregroundColor(.red)
             }
             
             Spacer()
             
-            HStack(spacing: 15) {
+            HStack(spacing: 12) {
                 Button(action: { loadBook(book) }) {
                     Image(systemName: "play.circle.fill")
                         .font(.title2)
                         .foregroundColor(.green)
                 }
                 
-                Button(action: { 
+                Button(action: {
                     bookToDelete = book
                     showingDeleteAlert = true
                 }) {
@@ -481,9 +521,11 @@ struct ContentView: View {
                 }
             }
         }
-        .padding()
-        .background(Color.white.opacity(0.9))
-        .cornerRadius(10)
+        .padding(.horizontal, 10)
+        .padding(.vertical, 6)
+        .background(Color.white.opacity(0.95))
+        .cornerRadius(8)
+        .shadow(color: .black.opacity(0.1), radius: 2, x: 0, y: 1)
     }
     
     private var pageCountInputView: some View {
@@ -592,7 +634,7 @@ struct ContentView: View {
                     isLoading = false
                     return
                 }
-                                if let responseString = String(data: data!, encoding: .utf8) {
+                if let responseString = String(data: data!, encoding: .utf8) {
                     print("最初のリクエストレスポンス:", responseString)
                     
                     // JSONレスポンスを解析
@@ -677,7 +719,7 @@ struct ContentView: View {
                 
                 // HTTPステータスコードをチェック
                 if let httpResponse = response as? HTTPURLResponse {
-                    if httpResponse.statusCode == 500 && retryCount < 3 {
+                    if httpResponse.statusCode == 500 && retryCount < 7 {
                         // 500エラーの場合、30秒待ってから再試行
                         DispatchQueue.main.asyncAfter(deadline: .now() + 30) {
                             self.executeSecondRequest(prompt: prompt, pageIndex: pageIndex, retryCount: retryCount + 1)
@@ -839,15 +881,21 @@ Write a book for children under 5 years old.
             return
         }
         
-        let title = "絵本 \(savedBooks.count + 1)"
+        // より意味のあるタイトルを生成（最初のページのテキストから）
+        let firstPageText = bookPages.first?.text ?? ""
+        let title = firstPageText.count > 20 ? String(firstPageText.prefix(20)) + "..." : firstPageText
+        let finalTitle = title.isEmpty ? "新しい絵本" : title
+        
         let savedBook = SavedBook(
-            title: title,
+            title: finalTitle,
             createdAt: Date(),
             pages: bookPages
         )
         
         savedBooks.append(savedBook)
         saveBooksToUserDefaults()
+        
+        print("絵本を保存しました: タイトル=\(finalTitle), ページ数=\(bookPages.count)")
         
         // 保存完了のフィードバック
         errorMessage = "絵本を保存しました"
@@ -890,6 +938,12 @@ Write a book for children under 5 years old.
         if let data = UserDefaults.standard.data(forKey: "SavedBooks"),
            let books = try? JSONDecoder().decode([SavedBook].self, from: data) {
             savedBooks = books
+            print("保存済み絵本を読み込みました: \(books.count)冊")
+            for (index, book) in books.enumerated() {
+                print("絵本\(index + 1): タイトル=\(book.title), ページ数=\(book.pageCount), 作成日=\(book.createdAt)")
+            }
+        } else {
+            print("保存済み絵本の読み込みに失敗しました")
         }
     }
     
@@ -901,8 +955,8 @@ Write a book for children under 5 years old.
     
     private func formatDate(_ date: Date) -> String {
         let formatter = DateFormatter()
-        formatter.dateStyle = .short
-        formatter.timeStyle = .short
+        formatter.dateFormat = "M/d HH:mm"
+        formatter.locale = Locale(identifier: "ja_JP")
         return formatter.string(from: date)
     }
     
