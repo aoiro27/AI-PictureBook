@@ -192,6 +192,8 @@ struct ContentView: View {
     @State private var bookToDelete: SavedBook? = nil
     @State private var pageCount: Int = 3
     @State private var showingPageCountInput: Bool = false
+    @State private var showingPromptInput: Bool = false
+    @State private var customPrompt: String = ""
     
     var body: some View {
         ZStack {
@@ -209,10 +211,13 @@ struct ContentView: View {
                 if showingMainMenu {
                     // メインメニュー
                     mainMenuView
-                } else if showingPageCountInput {
-                    // ページ数入力画面
-                    pageCountInputView
-                } else if bookPages.isEmpty || isGeneratingImages {
+                            } else if showingPageCountInput {
+                // ページ数入力画面
+                pageCountInputView
+            } else if showingPromptInput {
+                // プロンプト入力画面
+                promptInputView
+            } else if bookPages.isEmpty || isGeneratingImages {
                     // 初期画面または画像生成中
                     VStack(spacing: 30) {
                         if isGeneratingImages {
@@ -571,8 +576,100 @@ struct ContentView: View {
                 
                 VStack(spacing: 15) {
                     HStack(spacing: 20) {
-                        Button(action: { showingPageCountInput = false }) {
+                        Button(action: { 
+                            showingPageCountInput = false
+                            showingMainMenu = true
+                        }) {
                             Text("キャンセル")
+                                .font(.title3)
+                                .fontWeight(.semibold)
+                                .frame(width: 120, height: 50)
+                                .background(Color.gray)
+                                .foregroundColor(.white)
+                                .cornerRadius(25)
+                        }
+                        
+                        Button(action: { 
+                            showingPageCountInput = false
+                            showingPromptInput = true
+                        }) {
+                            Text("次へ")
+                                .font(.title3)
+                                .fontWeight(.semibold)
+                                .frame(width: 120, height: 50)
+                                .background(Color.blue)
+                                .foregroundColor(.white)
+                                .cornerRadius(25)
+                        }
+                    }
+                    
+                    Button(action: toggleOpeningBGM) {
+                        HStack(spacing: 8) {
+                            Image(systemName: bgmManager.isOpeningPlaying ? "speaker.wave.2.fill" : "speaker.slash.fill")
+                                .font(.title2)
+                            Text(bgmManager.isOpeningPlaying ? "音楽停止" : "音楽再生")
+                                .font(.headline)
+                        }
+                        .foregroundColor(.white)
+                        .padding(.horizontal, 20)
+                        .padding(.vertical, 10)
+                        .background(Color.black.opacity(0.5))
+                        .cornerRadius(20)
+                    }
+                }
+            }
+        }
+        .padding()
+    }
+    
+    private var promptInputView: some View {
+        VStack(spacing: 30) {
+            Image(systemName: "text.bubble.fill")
+                .font(.system(size: 80))
+                .foregroundColor(.white)
+            
+            Text("絵本のテーマを入力")
+                .font(.title)
+                .fontWeight(.bold)
+                .foregroundColor(.white)
+            
+            VStack(spacing: 20) {
+                Text("どんな絵本を作りたいですか？")
+                    .font(.headline)
+                    .foregroundColor(.white)
+                
+                Text("例：「お友達と遊ぶ話」「動物の冒険」「家族の絆」など")
+                    .font(.subheadline)
+                    .foregroundColor(.white.opacity(0.8))
+                    .multilineTextAlignment(.center)
+                
+                VStack(alignment: .leading, spacing: 8) {
+                    Text("テーマ（任意）")
+                        .font(.headline)
+                        .foregroundColor(.white)
+                    
+                    TextEditor(text: $customPrompt)
+                        .frame(height: 120)
+                        .padding(8)
+                        .background(Color.white.opacity(0.9))
+                        .cornerRadius(10)
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 10)
+                                .stroke(Color.white.opacity(0.5), lineWidth: 1)
+                        )
+                }
+                
+                Text("空欄の場合は、デフォルトのテーマで絵本を作成します")
+                    .font(.caption)
+                    .foregroundColor(.white.opacity(0.7))
+                
+                VStack(spacing: 15) {
+                    HStack(spacing: 20) {
+                        Button(action: { 
+                            showingPromptInput = false
+                            showingPageCountInput = true
+                        }) {
+                            Text("戻る")
                                 .font(.title3)
                                 .fontWeight(.semibold)
                                 .frame(width: 120, height: 50)
@@ -821,6 +918,7 @@ struct ContentView: View {
     
     private func startBookGeneration() {
         showingPageCountInput = false
+        showingPromptInput = false
         showingMainMenu = false
         bookPages = []
         currentPage = 0
@@ -831,17 +929,25 @@ struct ContentView: View {
     }
     
     private func generatePrompt() -> String {
+        let themePrompt = customPrompt.trimmingCharacters(in: .whitespacesAndNewlines)
+        let themeSection = themePrompt.isEmpty ? "" : """
+# Theme
+\(themePrompt)
+
+"""
+        
         return """
 # Task
 Write a book for children under 5 years old.
+theme is \(themeSection)
 
 # Requirements
 - The total number of pages between 1 and \(pageCount).
-
 # Characters in the Picture Book
 1. Shiki-chan (older brother)
 2. Shiro-chan (younger sister)
 3. Mama (Shiki-chan and Shiro-chan's mother)
+- For your response, as in the sample, please return IllustrationIdea in English and PageText in Japanese.
 
 # Sample Answer
 [
@@ -862,6 +968,8 @@ Write a book for children under 5 years old.
     private func returnToMainMenu() {
         showingMainMenu = true
         showingPageCountInput = false
+        showingPromptInput = false
+        customPrompt = ""
         bookPages = []
         currentPage = 0
         stopSpeech()
