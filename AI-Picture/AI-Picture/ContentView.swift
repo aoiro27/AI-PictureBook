@@ -416,7 +416,7 @@ struct ContentView: View {
                 .font(.system(size: 50))
                 .foregroundColor(.white)
             
-            Text("Original Picture Book")
+            Text("Your Picture Book")
                 .font(.title2)
                 .fontWeight(.bold)
                 .foregroundColor(.white)
@@ -942,7 +942,7 @@ Write a book for children under 5 years old.
 theme is \(themeSection)
 
 # Requirements
-- The total number of pages between 1 and \(pageCount).
+- The total number of pages is \(pageCount).
 # Characters in the Picture Book
 1. Shiki-chan (older brother)
 2. Shiro-chan (younger sister)
