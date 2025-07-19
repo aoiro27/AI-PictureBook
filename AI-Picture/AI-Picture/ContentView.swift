@@ -256,7 +256,7 @@ struct ContentView: View {
                     }
                 } else {
                     // 絵本表示画面
-                    VStack(spacing: 0) {
+                    VStack(spacing: 10) {
                         // ヘッダー
                         HStack {
                             Button(action: returnToMainMenu) {
@@ -297,8 +297,6 @@ struct ContentView: View {
                                     HStack(spacing: 5) {
                                         Image(systemName: "square.and.arrow.down")
                                             .font(.title2)
-                                        Text("保存")
-                                            .font(.headline)
                                     }
                                     .foregroundColor(.white)
                                     .padding(.horizontal, 12)
@@ -307,68 +305,75 @@ struct ContentView: View {
                                     .cornerRadius(20)
                                 }
                             }
-                            .padding(.trailing)
+                        //    .padding(.trailing)
                         }
-                        .padding(.top)
-                        .padding(.horizontal, 50)
+                        .padding(.top, 50)
+                        .padding(.horizontal, 70)
                         
-                        // 絵本ページ
-                        VStack(spacing: 20) {
-                            // 画像表示
-                            if let imageUrl = bookPages[currentPage].imageUrl,
-                               let imageURL = URL(string: imageUrl) {
-                                AsyncImage(url: imageURL) { phase in
-                                    switch phase {
-                                    case .empty:
-                                        ProgressView()
-                                            .frame(height: 300)
-                                    case .success(let image):
-                                        image
-                                            .resizable()
-                                            .scaledToFit()
-                                            .frame(maxWidth: 350, maxHeight: 300)
-                                            .cornerRadius(15)
-                                    case .failure:
-                                        Image(systemName: "photo")
-                                            .font(.system(size: 100))
-                                            .foregroundColor(.gray)
-                                            .frame(height: 300)
-                                    @unknown default:
-                                        EmptyView()
-                                    }
+                                            // 絵本ページ
+                    VStack(spacing: 15) {
+                        // 画像表示
+                        if let imageUrl = bookPages[currentPage].imageUrl,
+                           let imageURL = URL(string: imageUrl) {
+                            AsyncImage(url: imageURL) { phase in
+                                switch phase {
+                                case .empty:
+                                    ProgressView()
+                                        .frame(maxWidth: .infinity, maxHeight: .infinity)
+                                        .frame(height: UIScreen.main.bounds.height * 0.5)
+                                case .success(let image):
+                                     image
+                                        .resizable()
+                                        .scaledToFit()
+                                        .frame(maxWidth: .infinity, maxHeight: .infinity)
+                                        .frame(height: UIScreen.main.bounds.height * 0.5)
+                                        .cornerRadius(15)
+                                case .failure:
+                                    Image(systemName: "photo")
+                                        .font(.system(size: 100))
+                                        .foregroundColor(.gray)
+                                        .frame(maxWidth: .infinity, maxHeight: .infinity)
+                                        .frame(height: UIScreen.main.bounds.height * 0.5)
+                                @unknown default:
+                                    EmptyView()
                                 }
-                            } else {
-                                Rectangle()
-                                    .fill(Color.gray.opacity(0.3))
-                                    .frame(height: 300)
-                                    .overlay(
-                                        ProgressView()
-                                            .progressViewStyle(CircularProgressViewStyle())
-                                    )
                             }
-                            
-                            // テキスト表示
-                            Text(bookPages[currentPage].text)
-                                .font(.title3)
-                                .multilineTextAlignment(.center)
-                                .padding(.horizontal, 40)
-                                .frame(minHeight: 80)
+                        } else {
+                            Rectangle()
+                                .fill(Color.gray.opacity(0.3))
+                                .frame(maxWidth: .infinity, maxHeight: .infinity)
+                                .frame(height: UIScreen.main.bounds.height * 0.5)
+                                .overlay(
+                                    ProgressView()
+                                        .progressViewStyle(CircularProgressViewStyle())
+                                )
                         }
-                        .padding()
+                        
+                        // テキスト表示
+                        Text(bookPages[currentPage].text)
+                            .font(.title2)
+                            .foregroundColor(.white)
+                            .background(Color.black.opacity(0.5))
+                            .multilineTextAlignment(.center)
+                            .padding(.horizontal, 50)
+                            .frame(minHeight: 60)
+                    }
+                    .padding(.horizontal, 20)
+                    .padding(.vertical, 10)
                         
                         // ページ送りボタン
                         HStack(spacing: 40) {
                             Button(action: previousPage) {
                                 Image(systemName: "chevron.left.circle.fill")
                                     .font(.system(size: 40))
-                                    .foregroundColor(currentPage > 0 ? .white : .gray)
+                                    .foregroundColor(currentPage > 0 ? .blue : .gray)
                             }
                             .disabled(currentPage <= 0)
                             
                             Button(action: nextPage) {
                                 Image(systemName: "chevron.right.circle.fill")
                                     .font(.system(size: 40))
-                                    .foregroundColor(currentPage < bookPages.count - 1 ? .white : .gray)
+                                    .foregroundColor(currentPage < bookPages.count - 1 ? .blue : .gray)
                             }
                             .disabled(currentPage >= bookPages.count - 1)
                         }
@@ -816,7 +821,8 @@ struct ContentView: View {
                 
                 // HTTPステータスコードをチェック
                 if let httpResponse = response as? HTTPURLResponse {
-                    if httpResponse.statusCode == 500 && retryCount < 7 {
+                    if httpResponse.statusCode == 500 && retryCount < 10 {
+                        
                         // 500エラーの場合、30秒待ってから再試行
                         DispatchQueue.main.asyncAfter(deadline: .now() + 30) {
                             self.executeSecondRequest(prompt: prompt, pageIndex: pageIndex, retryCount: retryCount + 1)
@@ -824,6 +830,10 @@ struct ContentView: View {
                         return
                     }
                 }
+                
+                if let responseString = String(data: data!, encoding: .utf8) {
+                     print("レスポンスボディ: \(responseString)")
+                 }
                 
                 guard let data = data else {
                     self.handleImageRequestError(prompt: prompt, pageIndex: pageIndex, retryCount: retryCount, error: nil)
