@@ -6,186 +6,11 @@
 //
 
 import SwiftUI
-import AVFoundation
-
-struct BookPage: Codable {
-    let pageNumber: Int
-    let text: String
-    let illustrationIdea: String
-    var imageUrl: String?
-    var imageLoadingStatus: ImageLoadingStatus = .loading
-    
-    enum CodingKeys: String, CodingKey {
-        case pageNumber, text, illustrationIdea, imageUrl
-    }
-    
-    init(pageNumber: Int, text: String, illustrationIdea: String, imageUrl: String?) {
-        self.pageNumber = pageNumber
-        self.text = text
-        self.illustrationIdea = illustrationIdea
-        self.imageUrl = imageUrl
-        self.imageLoadingStatus = imageUrl != nil ? .success : .loading
-    }
-    
-    init(from decoder: Decoder) throws {
-        let container = try decoder.container(keyedBy: CodingKeys.self)
-        pageNumber = try container.decode(Int.self, forKey: .pageNumber)
-        text = try container.decode(String.self, forKey: .text)
-        illustrationIdea = try container.decode(String.self, forKey: .illustrationIdea)
-        imageUrl = try container.decodeIfPresent(String.self, forKey: .imageUrl)
-        imageLoadingStatus = imageUrl != nil ? .success : .loading
-    }
-    
-    func encode(to encoder: Encoder) throws {
-        var container = encoder.container(keyedBy: CodingKeys.self)
-        try container.encode(pageNumber, forKey: .pageNumber)
-        try container.encode(text, forKey: .text)
-        try container.encode(illustrationIdea, forKey: .illustrationIdea)
-        try container.encodeIfPresent(imageUrl, forKey: .imageUrl)
-    }
-}
-
-struct SavedBook: Codable, Identifiable {
-    let id = UUID()
-    let title: String
-    let createdAt: Date
-    let pages: [BookPage]
-    
-    var pageCount: Int {
-        return pages.count
-    }
-}
-
-enum ImageLoadingStatus {
-    case loading
-    case success
-    case failed
-}
-
-class SpeechManager: NSObject, ObservableObject, AVSpeechSynthesizerDelegate {
-    private let synthesizer = AVSpeechSynthesizer()
-    @Published var isSpeaking: Bool = false
-    
-    override init() {
-        super.init()
-        synthesizer.delegate = self
-    }
-    
-    func speak(_ text: String) {
-        stopSpeaking()
-        
-        let utterance = AVSpeechUtterance(string: text)
-        // Kyokoを明示的に指定
-        utterance.voice = AVSpeechSynthesisVoice(identifier: "com.apple.ttsbundle.Kyoko-premium")
-        utterance.rate = 0.5
-        utterance.pitchMultiplier = 1.0
-        utterance.volume = 0.8
-        utterance.postUtteranceDelay = 0.5
-        
-        synthesizer.speak(utterance)
-        isSpeaking = true
-    }
-    
-    func stopSpeaking() {
-        if synthesizer.isSpeaking {
-            synthesizer.stopSpeaking(at: .immediate)
-        }
-        isSpeaking = false
-    }
-    
-    // AVSpeechSynthesizerDelegate Delegate
-    func speechSynthesizer(_ synthesizer: AVSpeechSynthesizer, didFinish utterance: AVSpeechUtterance) {
-        DispatchQueue.main.async {
-            self.isSpeaking = false
-        }
-    }
-}
-
-class BGMManager: NSObject, ObservableObject {
-    private var bookAudioPlayer: AVAudioPlayer?
-    private var openingAudioPlayer: AVAudioPlayer?
-    @Published var isPlaying: Bool = false
-    @Published var isOpeningPlaying: Bool = false
-    
-    func playBGM() {
-        guard let url = Bundle.main.url(forResource: "book", withExtension: "mp3") else {
-            print("BGMファイルが見つかりません")
-            return
-        }
-        
-        do {
-            bookAudioPlayer = try AVAudioPlayer(contentsOf: url)
-            bookAudioPlayer?.numberOfLoops = -1 // 無限ループ
-            bookAudioPlayer?.volume = 0.3 // 音量を30%に設定
-            bookAudioPlayer?.play()
-            isPlaying = true
-        } catch {
-            print("BGM再生エラー: \(error)")
-        }
-    }
-    
-    func playOpeningBGM() {
-        guard let url = Bundle.main.url(forResource: "opening", withExtension: "mp3") else {
-            print("オープニングBGMファイルが見つかりません")
-            return
-        }
-        
-        do {
-            openingAudioPlayer = try AVAudioPlayer(contentsOf: url)
-            openingAudioPlayer?.numberOfLoops = -1 // 無限ループ
-            openingAudioPlayer?.volume = 0.4 // 音量を40%に設定
-            openingAudioPlayer?.play()
-            isOpeningPlaying = true
-        } catch {
-            print("オープニングBGM再生エラー: \(error)")
-        }
-    }
-    
-    func stopBGM() {
-        bookAudioPlayer?.stop()
-        isPlaying = false
-    }
-    
-    func stopOpeningBGM() {
-        openingAudioPlayer?.stop()
-        isOpeningPlaying = false
-    }
-    
-    func pauseBGM() {
-        bookAudioPlayer?.pause()
-        isPlaying = false
-    }
-    
-    func pauseOpeningBGM() {
-        openingAudioPlayer?.pause()
-        isOpeningPlaying = false
-    }
-    
-    func resumeBGM() {
-        bookAudioPlayer?.play()
-        isPlaying = true
-    }
-    
-    func resumeOpeningBGM() {
-        openingAudioPlayer?.play()
-        isOpeningPlaying = true
-    }
-    
-    func stopAllBGM() {
-        stopBGM()
-        stopOpeningBGM()
-    }
-}
 
 struct ContentView: View {
     @State private var bookPages: [BookPage] = []
     @State private var currentPage: Int = 0
     @State private var isLoading: Bool = false
-    @State private var isGeneratingImages: Bool = false
-    @State private var errorMessage: String? = nil
-    @StateObject private var speechManager = SpeechManager()
-    @StateObject private var bgmManager = BGMManager()
-    @State private var savedBooks: [SavedBook] = []
     @State private var showingMainMenu: Bool = true
     @State private var showingDeleteAlert: Bool = false
     @State private var showingStorageAlert: Bool = false
@@ -194,6 +19,11 @@ struct ContentView: View {
     @State private var showingPageCountInput: Bool = false
     @State private var showingPromptInput: Bool = false
     @State private var customPrompt: String = ""
+    
+    @StateObject private var speechManager = SpeechManager()
+    @StateObject private var bgmManager = BGMManager()
+    @StateObject private var bookGenerationService = BookGenerationService()
+    @StateObject private var storageManager = BookStorageManager()
     
     var body: some View {
         ZStack {
@@ -217,10 +47,10 @@ struct ContentView: View {
             } else if showingPromptInput {
                 // プロンプト入力画面
                 promptInputView
-            } else if bookPages.isEmpty || isGeneratingImages {
+                            } else if bookPages.isEmpty || bookGenerationService.isGeneratingImages {
                     // 初期画面または画像生成中
                     VStack(spacing: 30) {
-                        if isGeneratingImages {
+                        if bookGenerationService.isGeneratingImages {
                             Image(systemName: "paintbrush.fill")
                                 .font(.system(size: 80))
                                 .foregroundColor(.orange)
@@ -381,7 +211,7 @@ struct ContentView: View {
                     }
                 }
                 
-                if let error = errorMessage {
+                if let error = bookGenerationService.errorMessage {
                     Text(error)
                         .foregroundColor(.red)
                         .padding()
@@ -391,7 +221,6 @@ struct ContentView: View {
             }
         }
         .onAppear {
-            loadSavedBooks()
             // アプリ起動時にオープニングBGMを開始
             if !bgmManager.isOpeningPlaying {
                 bgmManager.playOpeningBGM()
@@ -455,7 +284,7 @@ struct ContentView: View {
                     }
                 }
                 
-                if !savedBooks.isEmpty {
+                if !storageManager.savedBooks.isEmpty {
                     Text("保存済みの絵本")
                         .font(.headline)
                         .foregroundColor(.white)
@@ -463,7 +292,7 @@ struct ContentView: View {
                     
                     ScrollView {
                         LazyVStack(spacing: 10) {
-                            ForEach(savedBooks) { book in
+                            ForEach(storageManager.savedBooks) { book in
                                 savedBookRow(book)
                             }
                         }
@@ -502,7 +331,7 @@ struct ContentView: View {
                     .lineLimit(1)
                     .foregroundColor(.black)
                 
-                Text("\(book.pageCount)ページ • \(formatDate(book.createdAt))")
+                Text("\(book.pageCount)ページ • \(storageManager.formatDate(book.createdAt))")
                     .font(.caption)
                     .foregroundColor(.gray)
                 
@@ -715,183 +544,43 @@ struct ContentView: View {
     
     func generateImage() {
         isLoading = true
-        errorMessage = nil
         
-        // 動的にプロンプトを生成
-        let dynamicPrompt = generatePrompt()
-        
-        // 最初のリクエスト: 新しいAPIエンドポイント
-        guard let firstUrl = URL(string: "https://ai-plot-488889291017.asia-northeast1.run.app") else { return }
-        let firstBody: [String: Any] = ["prompt": dynamicPrompt]
-        let firstJsonData = try? JSONSerialization.data(withJSONObject: firstBody)
-        var firstRequest = URLRequest(url: firstUrl)
-        firstRequest.httpMethod = "POST"
-        firstRequest.setValue("application/json", forHTTPHeaderField: "Content-Type")
-        firstRequest.httpBody = firstJsonData
-        
-        URLSession.shared.dataTask(with: firstRequest) { data, response, error in
+        bookGenerationService.generateBook(pageCount: pageCount, customPrompt: customPrompt) { pages in
+            
             DispatchQueue.main.async {
-                if let error = error {
-                    errorMessage = "最初のリクエストエラー: \(error.localizedDescription)"
-                    isLoading = false
-                    return
-                }
-                if let responseString = String(data: data!, encoding: .utf8) {
-                    print("最初のリクエストレスポンス:", responseString)
+                self.isLoading = false
+                
+                if let pages = pages {
+                    self.bookPages = pages
+                    self.currentPage = 0
                     
-                    // JSONレスポンスを解析
-                    do {
-                        if let json = try JSONSerialization.jsonObject(with: data!) as? [String: Any],
-                           let answer = json["answer"] as? String {
-                            
-                            // ```json と ``` を除去してJSON部分を抽出
-                            let jsonStart = answer.range(of: "```json\n")
-                            let jsonEnd = answer.range(of: "\n```")
-                            
-                            if let start = jsonStart, let end = jsonEnd {
-                                let jsonString = String(answer[start.upperBound..<end.lowerBound])
-                                
-                                if let jsonData = jsonString.data(using: .utf8),
-                                   let pages = try JSONSerialization.jsonObject(with: jsonData) as? [[String: Any]] {
-                                    
-                                    print("\n=== 絵本の内容 ===")
-                                    var tempPages: [BookPage] = []
-                                    for page in pages {
-                                        if let pageNum = page["page"] as? Int,
-                                           let pageText = page["PageText"] as? String,
-                                           let illustrationIdea = page["IllustrationIdea"] as? String {
-                                            print("ページ \(pageNum):")
-                                            print("  テキスト: \(pageText)")
-                                            print("  イラスト案: \(illustrationIdea)")
-                                            print("")
-                                            
-                                            let bookPage = BookPage(
-                                                pageNumber: pageNum,
-                                                text: pageText,
-                                                illustrationIdea: illustrationIdea,
-                                                imageUrl: nil
-                                            )
-                                            tempPages.append(bookPage)
-                                        }
-                                    }
-                                    
-                                    // ページを順番に並び替えて保存
-                                    tempPages.sort { $0.pageNumber < $1.pageNumber }
-                                    self.bookPages = tempPages
-                                    self.currentPage = 0
-                                    self.isGeneratingImages = true
-                                    
-                                    // 各ページの画像を生成
-                                    let constPrefix = "Shiki is a five-year-old human boy, and Shiro is his one-year-old little sister."
-                                    for (index, page) in tempPages.enumerated() {
-                                        self.executeSecondRequest(prompt: constPrefix + page.illustrationIdea, pageIndex: index, retryCount: 0)
-                                    }
-                                    
-                                    // オープニングBGMを停止して絵本BGMを開始
-                                    self.bgmManager.stopOpeningBGM()
-                                    self.bgmManager.playBGM()
-                                    // 音声読み上げは画像生成完了後に開始される
-                                }
+                    // オープニングBGMを停止して絵本BGMを開始
+                    self.bgmManager.stopOpeningBGM()
+                    self.bgmManager.playBGM()
+                    
+                    // 画像URL更新のコールバックを設定
+                    self.bookGenerationService.onImageGenerated = { pageIndex, imageUrl in
+                        DispatchQueue.main.async {
+                            if pageIndex < self.bookPages.count {
+                                self.bookPages[pageIndex].imageUrl = imageUrl
+                                self.bookPages[pageIndex].imageLoadingStatus = .success
                             }
                         }
-                    } catch {
-                        print("JSON解析エラー:", error)
                     }
-                } else {
-                    print("最初のリクエストレスポンス: デコードできませんでした")
-                }
-            }
-        }.resume()
-    }
-    
-    private func executeSecondRequest(prompt: String, pageIndex: Int, retryCount: Int) {
-        guard let url = URL(string: "https://ai-picture-488889291017.asia-northeast1.run.app") else { return }
-        let body: [String: Any] = ["prompt": prompt]
-        let jsonData = try? JSONSerialization.data(withJSONObject: body)
-        var request = URLRequest(url: url)
-        request.httpMethod = "POST"
-        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
-        request.httpBody = jsonData
-        URLSession.shared.dataTask(with: request) { data, response, error in
-            DispatchQueue.main.async {
-                if let error = error {
-                    self.handleImageRequestError(prompt: prompt, pageIndex: pageIndex, retryCount: retryCount, error: error)
-                    return
-                }
-                
-                // HTTPステータスコードをチェック
-                if let httpResponse = response as? HTTPURLResponse {
-                    if httpResponse.statusCode == 500 && retryCount < 10 {
-                        
-                        // 500エラーの場合、30秒待ってから再試行
-                        DispatchQueue.main.asyncAfter(deadline: .now() + 30) {
-                            self.executeSecondRequest(prompt: prompt, pageIndex: pageIndex, retryCount: retryCount + 1)
+                    
+                    // 画像生成を開始
+                    self.bookGenerationService.generateImagesSequentially(pages: pages) {
+                        // 画像生成完了後に音声読み上げを開始
+                        DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
+                            self.startSpeech()
                         }
-                        return
                     }
                 }
-                
-                if let responseString = String(data: data!, encoding: .utf8) {
-                     print("レスポンスボディ: \(responseString)")
-                 }
-                
-                guard let data = data else {
-                    self.handleImageRequestError(prompt: prompt, pageIndex: pageIndex, retryCount: retryCount, error: nil)
-                    return
-                }
-                
-                do {
-                    if let json = try JSONSerialization.jsonObject(with: data) as? [String: Any],
-                       let url = json["image_url"] as? String {
-                        // 対応するページの画像URLを更新
-                        if pageIndex < self.bookPages.count {
-                            self.bookPages[pageIndex].imageUrl = url
-                            self.bookPages[pageIndex].imageLoadingStatus = .success
-                        }
-                    } else {
-                        self.handleImageRequestError(prompt: prompt, pageIndex: pageIndex, retryCount: retryCount, error: nil)
-                    }
-                } catch {
-                    self.handleImageRequestError(prompt: prompt, pageIndex: pageIndex, retryCount: retryCount, error: error)
-                }
-                
-                // すべての画像の生成状況をチェック
-                self.checkAllImagesGenerated()
             }
-        }.resume()
-    }
-    
-    private func handleImageRequestError(prompt: String, pageIndex: Int, retryCount: Int, error: Error?) {
-        if retryCount < 3 {
-            // 30秒待ってから再試行
-            DispatchQueue.main.asyncAfter(deadline: .now() + 30) {
-                self.executeSecondRequest(prompt: prompt, pageIndex: pageIndex, retryCount: retryCount + 1)
-            }
-        } else {
-            // 3回試行しても失敗した場合
-            if pageIndex < self.bookPages.count {
-                self.bookPages[pageIndex].imageLoadingStatus = .failed
-            }
-            self.errorMessage = "画像生成に失敗しました (ページ\(pageIndex + 1))"
-            self.checkAllImagesGenerated()
         }
     }
     
-    private func checkAllImagesGenerated() {
-        let allCompleted = bookPages.allSatisfy { page in
-            page.imageLoadingStatus == .success || page.imageLoadingStatus == .failed
-        }
-        
-        if allCompleted {
-            isGeneratingImages = false
-            isLoading = false
-            
-            // 画像生成完了後に音声読み上げを開始
-            DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
-                self.startSpeech()
-            }
-        }
-    }
+
     
     private func startSpeech() {
         guard !bookPages.isEmpty && currentPage < bookPages.count else { return }
@@ -933,47 +622,10 @@ struct ContentView: View {
         bookPages = []
         currentPage = 0
         isLoading = false
-        isGeneratingImages = false
-        errorMessage = nil
         generateImage()
     }
     
-    private func generatePrompt() -> String {
-        let themePrompt = customPrompt.trimmingCharacters(in: .whitespacesAndNewlines)
-        let themeSection = themePrompt.isEmpty ? "" : """
-# Theme
-\(themePrompt)
 
-"""
-        
-        return """
-# Task
-Write a book for children under 5 years old.
-theme is \(themeSection)
-
-# Requirements
-- The total number of pages is \(pageCount).
-# Characters in the Picture Book
-1. Shiki-chan (older brother)
-2. Shiro-chan (younger sister)
-3. Mama (Shiki-chan and Shiro-chan's mother)
-- For your response, as in the sample, please return IllustrationIdea in English and PageText in Japanese.
-
-# Sample Answer
-[
-    {
-        "IllustrationIdea":  "A picture of the older brother and younger sister looking at a pill bug in the park",
-        "PageText": "ある日、お兄ちゃんと妹は公園に遊びに行ったところ、ダンゴムシを見つけました",
-        "page": 1
-    },
-    {
-        "IllustrationIdea":  "A picture of the pill bug curling up in surprise",
-        "PageText": "ダンゴムシは突然丸くなったので、お兄ちゃんと妹はとてもびっくりしました",
-        "page": 2
-    }
-]
-"""
-    }
     
     private func returnToMainMenu() {
         showingMainMenu = true
@@ -993,37 +645,19 @@ theme is \(themeSection)
     private func saveBook() {
         guard !bookPages.isEmpty else { return }
         
-        // 保存容量チェック
-        if savedBooks.count >= 10 {
+        if storageManager.saveBook(bookPages) {
+            // 保存完了のフィードバック
+            bookGenerationService.errorMessage = "絵本を保存しました"
+            DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
+                self.bookGenerationService.errorMessage = nil
+            }
+        } else {
             showingStorageAlert = true
-            return
-        }
-        
-        // より意味のあるタイトルを生成（最初のページのテキストから）
-        let firstPageText = bookPages.first?.text ?? ""
-        let title = firstPageText.count > 20 ? String(firstPageText.prefix(20)) + "..." : firstPageText
-        let finalTitle = title.isEmpty ? "新しい絵本" : title
-        
-        let savedBook = SavedBook(
-            title: finalTitle,
-            createdAt: Date(),
-            pages: bookPages
-        )
-        
-        savedBooks.append(savedBook)
-        saveBooksToUserDefaults()
-        
-        print("絵本を保存しました: タイトル=\(finalTitle), ページ数=\(bookPages.count)")
-        
-        // 保存完了のフィードバック
-        errorMessage = "絵本を保存しました"
-        DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
-            errorMessage = nil
         }
     }
     
     private func loadBook(_ book: SavedBook) {
-        bookPages = book.pages
+        bookPages = storageManager.loadBook(book)
         currentPage = 0
         showingMainMenu = false
         showingPageCountInput = false
@@ -1040,43 +674,15 @@ theme is \(themeSection)
     private func deleteBook() {
         guard let bookToDelete = bookToDelete else { return }
         
-        savedBooks.removeAll { $0.id == bookToDelete.id }
-        saveBooksToUserDefaults()
+        storageManager.deleteBook(bookToDelete)
         self.bookToDelete = nil
     }
     
     private func deleteOldestBook() {
-        if let oldestBook = savedBooks.min(by: { $0.createdAt < $1.createdAt }) {
-            savedBooks.removeAll { $0.id == oldestBook.id }
-            saveBooksToUserDefaults()
-        }
+        storageManager.deleteOldestBook()
     }
     
-    private func loadSavedBooks() {
-        if let data = UserDefaults.standard.data(forKey: "SavedBooks"),
-           let books = try? JSONDecoder().decode([SavedBook].self, from: data) {
-            savedBooks = books
-            print("保存済み絵本を読み込みました: \(books.count)冊")
-            for (index, book) in books.enumerated() {
-                print("絵本\(index + 1): タイトル=\(book.title), ページ数=\(book.pageCount), 作成日=\(book.createdAt)")
-            }
-        } else {
-            print("保存済み絵本の読み込みに失敗しました")
-        }
-    }
-    
-    private func saveBooksToUserDefaults() {
-        if let data = try? JSONEncoder().encode(savedBooks) {
-            UserDefaults.standard.set(data, forKey: "SavedBooks")
-        }
-    }
-    
-    private func formatDate(_ date: Date) -> String {
-        let formatter = DateFormatter()
-        formatter.dateFormat = "M/d HH:mm"
-        formatter.locale = Locale(identifier: "ja_JP")
-        return formatter.string(from: date)
-    }
+
     
     private func nextPage() {
         if currentPage < bookPages.count - 1 {
